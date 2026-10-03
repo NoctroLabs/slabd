@@ -22,15 +22,17 @@ broken** below. A change should not add to that count.
 ## Read this before touching a shared rule
 
 Four rules are implemented twice, once here in TypeScript and once in Swift in
-the iOS repo. `shared/fixtures/` holds the contract as JSON cases that both
-sides run as tests, with `shared/fixtures/README.md` explaining the setup.
+the iOS repo, `NoctroLabs/slabd-ios`. `shared/fixtures/` holds the contract as
+JSON cases, with `shared/fixtures/README.md` explaining the setup. **Only this
+side runs them as tests so far**; wiring the Swift side up to the same files is
+the obvious next step, and until then the two are held in step by hand.
 
 | Rule | Here | iOS |
 | --- | --- | --- |
-| CSV date normalising | `normalizeDate` in `src/lib/csv.ts` | the importer's date guard |
-| Break cost per hit | `perHitCost` in `src/lib/breaks.ts` | the break allocation |
+| CSV date normalising | `normalizeDate` in `src/lib/csv.ts` | `normalizeDateField` in `CSV.swift` |
+| Break cost per hit | `perHitCost` in `src/lib/breaks.ts` | `perHit` in `BreakSpotDetailView.swift` |
 | Card profit and loss | `profitLoss` in `src/lib/format.ts` | `Card.profitLoss` |
-| CSV columns | `CSV_COLUMNS` in `src/lib/csv.ts` | `Card.csvColumns` |
+| CSV columns | `CSV_COLUMNS` in `src/lib/csv.ts` | `Card.csvColumns` in `CSV.swift` |
 
 **Changing one of these means changing the fixture, and the iOS side has to
 change with it.** Do not "fix" one of these functions to match a bug report
