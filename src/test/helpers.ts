@@ -42,6 +42,7 @@ export function card(overrides: Partial<Card> = {}): Card {
     grade: null,
     unique_serial: null,
     break_spot_id: null,
+    wax_id: null,
     ...overrides,
   }
 }

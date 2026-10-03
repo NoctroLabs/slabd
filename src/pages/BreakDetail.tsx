@@ -6,7 +6,7 @@ import { useBreaks } from '../hooks/useBreaks'
 import { useCards } from '../hooks/useCards'
 import { supabase, cardThumbUrl } from '../lib/supabase'
 import { hitsFor, perHitCost, spotProfitLoss, percent, type BreakSpot } from '../lib/breaks'
-import { money, signedMoney } from '../lib/format'
+import { money, signedMoney, formatDate } from '../lib/format'
 
 export function BreakDetail() {
   const { id } = useParams()
@@ -139,7 +139,7 @@ export function BreakDetail() {
         <div className="space-y-6">
           <div className="flex flex-wrap items-center gap-3">
             <p className="mr-auto text-[0.88rem] text-secondary">
-              {[brk.break_date, brk.seller].filter((v) => v && v.trim()).join(' · ') ||
+              {[brk.break_date && formatDate(brk.break_date), brk.seller].filter((v) => v && v.trim()).join(' · ') ||
                 'No date or seller'}
             </p>
             <Link

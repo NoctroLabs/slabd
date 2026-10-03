@@ -1,13 +1,69 @@
 {
-  "rule": "Profit or loss on one card. If it is sold, the realised sale price against what was paid. Otherwise the current comp value against what was paid. A missing figure counts as zero, so an unvalued card reads as a loss of its cost rather than as break-even.",
+  "rule": "Profit or loss on one card. If it is sold, the realised sale price against what was paid. Otherwise the current comp value against what was paid. A card with no value recorded returns nothing at all, because unvalued means unknown rather than worthless: treating it as zero reported every unpriced card as a total loss. A missing cost, by contrast, counts as zero, matching how total spend is summed.",
   "cases": [
-    { "status": "Kept", "price_paid": 10, "comp_value": 25, "sold_price": null, "expect": 15, "why": "unrealised gain on a held card" },
-    { "status": "Kept", "price_paid": 40, "comp_value": 25, "sold_price": null, "expect": -15, "why": "held and underwater" },
-    { "status": "Sold", "price_paid": 10, "comp_value": 25, "sold_price": 30, "expect": 20, "why": "realised: the sale price wins and comp value is ignored" },
-    { "status": "Sold", "price_paid": 10, "comp_value": 25, "sold_price": null, "expect": -10, "why": "sold with no price recorded is a total loss, not a gain from comp" },
-    { "status": "Kept", "price_paid": 10, "comp_value": null, "sold_price": null, "expect": -10, "why": "no comp value yet reads as a loss of cost" },
-    { "status": "For Sale", "price_paid": 10, "comp_value": 5, "sold_price": null, "expect": -5, "why": "listed but unsold is still valued at comp" },
-    { "status": "Kept", "price_paid": null, "comp_value": 20, "sold_price": null, "expect": 20, "why": "a gift or unrecorded cost counts as free" },
-    { "status": "Kept", "price_paid": null, "comp_value": null, "sold_price": null, "expect": 0, "why": "nothing known either way" }
+    {
+      "status": "Kept",
+      "price_paid": 10,
+      "comp_value": 25,
+      "sold_price": null,
+      "expect": 15,
+      "why": "unrealised gain on a held card"
+    },
+    {
+      "status": "Kept",
+      "price_paid": 40,
+      "comp_value": 25,
+      "sold_price": null,
+      "expect": -15,
+      "why": "held and underwater"
+    },
+    {
+      "status": "Sold",
+      "price_paid": 10,
+      "comp_value": 25,
+      "sold_price": 30,
+      "expect": 20,
+      "why": "realised: the sale price wins and comp value is ignored"
+    },
+    {
+      "status": "Sold",
+      "price_paid": 10,
+      "comp_value": 25,
+      "sold_price": null,
+      "expect": null,
+      "why": "sold with no price recorded has no realised figure yet, so no profit either"
+    },
+    {
+      "status": "Kept",
+      "price_paid": 10,
+      "comp_value": null,
+      "sold_price": null,
+      "expect": null,
+      "why": "no comp value yet means unknown, not a loss of cost"
+    },
+    {
+      "status": "For Sale",
+      "price_paid": 10,
+      "comp_value": 5,
+      "sold_price": null,
+      "expect": -5,
+      "why": "listed but unsold is still valued at comp"
+    },
+    {
+      "status": "Kept",
+      "price_paid": null,
+      "comp_value": 20,
+      "sold_price": null,
+      "expect": 20,
+      "why": "a gift or unrecorded cost counts as free"
+    },
+    {
+      "status": "Kept",
+      "price_paid": null,
+      "comp_value": null,
+      "sold_price": null,
+      "expect": null,
+      "why": "nothing known either way"
+    }
   ]
 }

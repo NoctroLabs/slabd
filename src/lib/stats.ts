@@ -1,4 +1,5 @@
-import type { Card } from './types'
+import type { Card, Wax } from './types'
+import { isSealed, sealedProfit } from './types'
 import { profitLoss } from './format'
 
 export interface Stats {
@@ -13,13 +14,31 @@ export interface Stats {
   byCategory: { label: string; value: number; count: number }[]
   byStatus: { label: string; count: number }[]
   topCards: Card[]
+  /** Sealed boxes with no value recorded, so the interface can say why they
+   *  aren't in the figures rather than leaving a silent gap. */
+  unvaluedSealed: number
 }
 
-export function deriveStats(cards: Card[]): Stats {
+/** Totals across the collection.
+ *
+ *  Sealed wax counts; opened wax doesn't. An opened box's cost has already
+ *  been allocated onto the cards that came out of it, so counting the box as
+ *  well would charge the same money twice. An unvalued box contributes
+ *  nothing to value, exactly as an unvalued card does — matching
+ *  `CardStore.totalCompValueKept` in the app, which has to agree with this or
+ *  the same collection reads two different totals depending which you opened.
+ */
+export function deriveStats(cards: Card[], wax: Wax[] = []): Stats {
+  const sealed = wax.filter(isSealed)
+  const sealedSpend = sealed.reduce((s, w) => s + (w.price_paid ?? 0), 0)
+  const sealedValue = sealed.reduce((s, w) => s + (w.comp_value ?? 0), 0)
+  const sealedPL = sealed.reduce((s, w) => s + (sealedProfit(w) ?? 0), 0)
+
   const held = cards.filter((c) => c.status !== 'Sold')
-  const totalPaid = cards.reduce((s, c) => s + (c.price_paid ?? 0), 0)
-  const heldValue = held.reduce((s, c) => s + (c.comp_value ?? 0), 0)
-  const profit = cards.reduce((s, c) => s + profitLoss(c), 0)
+  const totalPaid = cards.reduce((s, c) => s + (c.price_paid ?? 0), 0) + sealedSpend
+  const heldValue = held.reduce((s, c) => s + (c.comp_value ?? 0), 0) + sealedValue
+  // Unvalued cards contribute nothing rather than a phantom loss.
+  const profit = cards.reduce((s, c) => s + (profitLoss(c) ?? 0), 0) + sealedPL
 
   const catMap = new Map<string, { value: number; count: number }>()
   for (const c of held) {
@@ -36,7 +55,10 @@ export function deriveStats(cards: Card[]): Stats {
     totalPaid,
     heldValue,
     profit,
-    averageValue: held.length ? heldValue / held.length : 0,
+    // Deliberately excludes sealed wax: this is the average value of a card,
+    // and a box is not a card. Including it would make the average of 80
+    // cards move because a blaster was logged.
+    averageValue: held.length ? (heldValue - sealedValue) / held.length : 0,
     byCategory: [...catMap.entries()]
       .map(([label, v]) => ({ label, ...v }))
       .sort((a, b) => b.value - a.value),
@@ -47,5 +69,6 @@ export function deriveStats(cards: Card[]): Stats {
       .filter((c) => (c.comp_value ?? 0) > 0)
       .sort((a, b) => (b.comp_value ?? 0) - (a.comp_value ?? 0))
       .slice(0, 6),
+    unvaluedSealed: sealed.filter((w) => w.comp_value == null).length,
   }
 }

@@ -84,9 +84,11 @@ describe('parseCards', () => {
     const { rows } = parseCards('player,price_paid,comp_value,sold_price\r\nMbappe,10.50,25,0')
     expect(rows[0].values.price_paid).toBe(10.5)
     expect(rows[0].values.comp_value).toBe(25)
-    // Zero is falsy, and `Number(v) || null` turns it into null. Recorded
-    // here as the current behaviour so a change to it is a deliberate one.
-    expect(rows[0].values.sold_price).toBeNull()
+    // A legitimate zero survives. `Number(v) || null` used to turn it into
+    // null, so a card acquired for nothing imported with no price at all —
+    // and the app kept the zero, so the same file built two different
+    // collections depending which side opened it.
+    expect(rows[0].values.sold_price).toBe(0)
   })
 
   it('normalises a spreadsheet-mangled date on the way in', () => {

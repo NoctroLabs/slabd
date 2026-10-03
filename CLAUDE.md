@@ -14,10 +14,10 @@ npm run verify      # tsc -b, then oxlint, then the unit tests
 ```
 
 Run it before saying a change is done, and paste the result rather than
-describing it. `npm test` alone runs just the tests. Lint currently emits 15
-warnings and zero errors: 14 `set-state-in-effect` and one other. Those are
-known and listed under **Deliberate, not broken** below. A change should not
-add to that count.
+describing it. `npm test` alone runs just the tests. Lint currently emits 18
+warnings and zero errors: 17 `set-state-in-effect` and one
+`only-export-components`. Those are known and listed under **Deliberate, not
+broken** below. A change should not add to that count.
 
 ## Read this before touching a shared rule
 
@@ -47,6 +47,13 @@ change to any of them as needing the same care:
 - The picker options in `src/lib/options.ts` match the enums in the app's
   `Card.swift`. These are stored as raw strings, so a mismatch shows as a blank
   picker on the other side.
+- **A card has one cost basis.** `break_spot_id` and `wax_id` are mutually
+  exclusive, enforced by a CHECK constraint, because two allocation triggers
+  would each write `price_paid`.
+- **The cost allocation rule lives in the database, once**, in
+  `reallocate_cost_pool`: a break spot's cost and a sealed box's price both
+  divide across the cards linked to them. Never reimplement it in a client. It
+  used to live in both and they drifted.
 - The colour and font tokens in `src/index.css` come from the app's
   `Theme.swift`. JPEG quality 0.82 and the `<user id>/<uuid>.jpg` storage path
   in `src/lib/images.ts` match the app too, and the path shape is what the
@@ -112,7 +119,7 @@ oversight:
   sizes, and the fix is real work, not a one-liner.
 - **One JS bundle, no code splitting.** The build warns about the 500 kB
   chunk. Known.
-- **14 `set-state-in-effect` lint warnings.** Fixing them is a real refactor of
+- **17 `set-state-in-effect` lint warnings.** Fixing them is a real refactor of
   the data hooks and forms, not a tidy-up.
 - **CSV import is one request per row.** Slow for a large file, and there is no
   transaction, so a part-failed import leaves a partial result.
@@ -142,8 +149,12 @@ oversight:
 
 ## Not in this repo
 
-The Supabase side is not version-controlled here and cannot be reviewed from
-this repo: row-level security policies, the `card-data` and `delete-account`
-edge functions, the `rename_category` RPC, the break allocation trigger, the
-founding-plan trigger, and the nightly `collection_snapshots` job. If a change
-here depends on one of those, say so rather than guessing at its behaviour.
+The Supabase side is not in this repo, but it **is** version-controlled: the
+migrations and edge functions live alongside the iOS app, under `supabase/` in
+the `card-vault` repo (private). That covers the row-level security policies,
+the `card-data` and `delete-account` functions, the `rename_category` RPC,
+`reallocate_cost_pool`, the founding-plan trigger, and the nightly
+`collection_snapshots` job.
+
+So a change here that depends on one of those can be checked rather than
+guessed at — but it needs that repo open too. Say which you looked at.

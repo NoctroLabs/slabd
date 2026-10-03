@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-
-export type Plan = 'founding' | 'free' | 'pro'
+import { allows, canAddCard, cardLimit, isPaid, type Feature, type Plan } from '../lib/plans'
 
 /** Which plan the account is on.
  *
@@ -29,5 +28,13 @@ export function usePlan() {
     }
   }, [])
 
-  return { plan, loading, isFounding: plan === 'founding' }
+  return {
+    plan,
+    loading,
+    isFounding: plan === 'founding',
+    isPaid: isPaid(plan),
+    limit: cardLimit(plan),
+    allows: (feature: Feature) => allows(plan, feature),
+    canAddCard: (count: number) => canAddCard(plan, count),
+  }
 }

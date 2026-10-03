@@ -7,7 +7,7 @@ import { Bullets, Clause, LegalPage } from '../components/Legal'
  *  change in the same commit. */
 export function Privacy() {
   return (
-    <LegalPage title="Privacy Policy" updated="4 September 2026">
+    <LegalPage title="Privacy Policy" updated="7 September 2026">
       <Clause heading="The short version">
         <p>
           SLABD stores the collection you enter and the email address you sign in with. We don't
@@ -41,6 +41,11 @@ export function Privacy() {
               These are resized and stored in our hosting provider's file storage.
             </>,
             <>
+              <strong className="text-primary">Your subscription status.</strong> If you subscribe,
+              we hold which plan you're on and when it changed. We never see your payment details —
+              see below.
+            </>,
+            <>
               <strong className="text-primary">Technical information.</strong> Our hosting providers
               keep standard server logs, which include IP addresses, for security and
               troubleshooting.
@@ -58,6 +63,27 @@ export function Privacy() {
           We process your account details and your collection to provide the service you asked for —
           in legal terms, performance of our contract with you. We keep server logs on the basis of
           our legitimate interest in keeping the service secure and working.
+        </p>
+      </Clause>
+
+      <Clause heading="Subscriptions and payments">
+        <p>
+          Premium is sold as an auto-renewing subscription through Apple's In-App Purchase. Apple
+          takes the payment and holds your payment details — we never receive your card number, and
+          we couldn't charge you ourselves if we wanted to.
+        </p>
+        <p>
+          We use <strong className="text-primary">RevenueCat</strong> to keep track of whether a
+          subscription is active. When you open the app we send RevenueCat your SLABD account
+          identifier — a random string, not your email — and Apple tells RevenueCat when a
+          subscription starts, renews, lapses or is refunded. RevenueCat passes that back to us, and
+          all we store is which plan you're on. It's what lets Premium work on a new phone without
+          you having to buy it again.
+        </p>
+        <p>
+          Cancel or manage a subscription in your Apple account settings, not here — Apple owns that
+          relationship. Cancelling stops the next payment and you keep Premium until the period
+          you've already paid for ends.
         </p>
       </Clause>
 
@@ -92,8 +118,13 @@ export function Privacy() {
               about your collection is sent.
             </>,
             <>
-              <strong className="text-primary">Apple</strong> — if you use the iPhone app, Apple
-              handles its distribution.
+              <strong className="text-primary">Apple</strong> — distributes the iPhone app and
+              processes subscription payments.
+            </>,
+            <>
+              <strong className="text-primary">RevenueCat</strong> — tells us whether your
+              subscription is active. Receives your account identifier and your subscription
+              history, and nothing about your collection.
             </>,
           ]}
         />
@@ -115,8 +146,9 @@ export function Privacy() {
       <Clause heading="How long we keep it">
         <p>
           Your collection stays until you delete it or close your account. Deleting a card removes
-          it and its photo. If you ask us to close your account we delete your data within 30 days,
-          apart from anything we're legally required to retain. Server logs are kept for a short
+          it and its photo. You can delete your account yourself, from Data &amp; Sharing in the app
+          — that removes your cards, photos, breaks, want list and the account itself immediately,
+          not on a 30-day timer. You can also email us to do it. Server logs are kept for a short
           period by our providers as part of their normal operation.
         </p>
       </Clause>

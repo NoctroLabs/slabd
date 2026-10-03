@@ -4,7 +4,7 @@ import { AppShell } from '../components/AppShell'
 import { Slab } from '../components/Slab'
 import { useCard } from '../hooks/useCard'
 import { supabase, toSlabCard } from '../lib/supabase'
-import { money, profitLoss } from '../lib/format'
+import { money, profitLoss, formatDate } from '../lib/format'
 import { gradeName } from '../lib/types'
 
 function Rows({ title, rows }: { title: string; rows: [string, string][] }) {
@@ -144,7 +144,7 @@ export function CardDetail() {
               rows={[
                 ['Source', card.source || '—'],
                 ['Bought from', card.seller || '—'],
-                ['Date acquired', card.date_acquired || '—'],
+                ['Date acquired', formatDate(card.date_acquired)],
                 ['Price paid', money(card.price_paid)],
               ]}
             />
@@ -158,13 +158,19 @@ export function CardDetail() {
                 ...(card.status === 'Sold'
                   ? ([
                       ['Sold price', money(card.sold_price)],
-                      ['Sold date', card.sold_date || '—'],
+                      ['Sold date', formatDate(card.sold_date)],
                     ] as [string, string][])
                   : []),
-                [
-                  profitLoss(card) >= 0 ? 'Up on cost' : 'Down on cost',
-                  `${profitLoss(card) >= 0 ? '+' : '−'}${money(Math.abs(profitLoss(card)))}`,
-                ],
+                // Null means the card has no valuation yet, which is not the
+                // same as breaking even.
+                (() => {
+                  const pl = profitLoss(card)
+                  if (pl == null) return ['Up or down', 'Not valued yet'] as [string, string]
+                  return [
+                    pl >= 0 ? 'Up on cost' : 'Down on cost',
+                    `${pl >= 0 ? '+' : '−'}${money(Math.abs(pl))}`,
+                  ] as [string, string]
+                })(),
               ]}
             />
 

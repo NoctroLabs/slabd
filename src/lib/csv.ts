@@ -70,6 +70,40 @@ export function normalizeDate(raw: string): string {
   return `${year}-${pad(String(month))}-${pad(String(day))}`
 }
 
+/** Parses a money cell.
+ *
+ *  `Number(v) || null` was wrong here: `Number('0')` is `0`, which is falsy,
+ *  so a card genuinely acquired for nothing — a giveaway, a freebie in a
+ *  trade — imported with no price at all. The app's `Double.init` kept the
+ *  zero, so the same file produced different collections depending which side
+ *  opened it, and a zero cost is not the same as an unknown one: it counts
+ *  towards total spend and towards profit. */
+function parseMoney(raw: string): number | null {
+  const n = Number(raw)
+  return Number.isFinite(n) ? n : null
+}
+
+/** Columns whose values are a fixed set, with the values themselves. Casing
+ *  is corrected on import: a hand-typed `sold` clearly means `Sold`, the
+ *  database now refuses anything else on `status`, and the old behaviour was
+ *  to store it and then compute profit from the comp value instead of the
+ *  sale price — wrong figures, no error. Mirrors `canonical` in the app's
+ *  `CSV.swift`.
+ *
+ *  An unrecognised value passes through untouched, so the database rejects it
+ *  visibly rather than it being reinterpreted as something unwritten. */
+const CANONICAL: Record<string, string[]> = {
+  status: ['Kept', 'For Sale', 'Sold'],
+  serial_kind: ['Base', 'Serial', 'SSP', 'Case Hit'],
+  source: ['Single Purchase', 'Break', 'Opened Wax'],
+}
+
+function canonicalise(col: string, raw: string): string {
+  const options = CANONICAL[col]
+  if (!options) return raw
+  return options.find((o) => o.toLowerCase() === raw.toLowerCase()) ?? raw
+}
+
 const escape = (v: string) => (/[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)
 
 export function encodeCSV(cards: Card[]): string {
@@ -169,10 +203,10 @@ export function parseCards(text: string): { rows: ParsedRow[]; skipped: number }
         v === ''
           ? null
           : NUMERIC.has(col)
-            ? Number(v) || null
+            ? parseMoney(v)
             : DATES.has(col)
               ? normalizeDate(v)
-              : v
+              : canonicalise(col, v)
     }
 
     const id = idIndex >= 0 ? line[idIndex]?.trim() || null : null

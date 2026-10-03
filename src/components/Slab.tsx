@@ -1,4 +1,6 @@
 import { gradeName } from '../lib/types'
+import { QRCode, verificationURL } from './QRCode'
+import { FUNCTIONS_BASE } from '../lib/supabase'
 
 export interface SlabCard {
   player: string
@@ -126,7 +128,29 @@ export function Slab({ card }: { card: SlabCard }) {
               ))}
             </div>
           </div>
-          <div className="shrink-0">
+          {/* The right cluster, in the app's order: code, serial, designation.
+              The serial runs vertically between the two, which costs about
+              14px of width instead of the 80 it would take set horizontally —
+              the reason the app does it that way, and the layout is tighter
+              here than on a phone, not looser. */}
+          <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+            {card.uniqueSerial && (
+              <>
+                <QRCode
+                  content={verificationURL(card.uniqueSerial, FUNCTIONS_BASE)}
+                  title={`Verification code for card ${card.uniqueSerial}`}
+                  className="w-9 shrink-0 text-white/90 sm:w-11"
+                />
+                <span
+                  className="figures shrink-0 text-[0.6rem] tracking-[0.04em] text-white/55 [writing-mode:vertical-rl] rotate-180"
+                  // Not aria-hidden: this is the card's permanent identifier,
+                  // and it's the thing somebody reads out or types in when a
+                  // code won't scan. The rotation is presentational only.
+                >
+                  {card.uniqueSerial}
+                </span>
+              </>
+            )}
             <Designation card={card} />
           </div>
         </div>

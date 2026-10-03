@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Slab } from '../components/Slab'
+import { AppStoreButton } from '../components/AppStore'
 import { Footer, Nav } from '../components/Chrome'
 import { AppOnly } from '../components/PlatformBadge'
 import { heroCard } from '../lib/demo'
@@ -36,6 +37,10 @@ const features: { title: string; body: string; app?: boolean }[] = [
   {
     title: 'Break tracking',
     body: 'Buy into a break, log the spots and hits, and see the real cost per card once a box is split rather than a lump sum.',
+  },
+  {
+    title: 'Sealed wax',
+    body: 'Log a box while it is sealed and track what it is worth. Open it and what you paid spreads across the cards you pull, so you know whether the box beat its price.',
   },
   {
     title: 'Insurance-ready records',
@@ -76,7 +81,7 @@ export function Home() {
       <section className="mx-auto grid max-w-6xl items-center gap-14 px-5 pt-16 pb-24 lg:grid-cols-2 lg:gap-20 lg:pt-24">
         <div>
           <p className="font-display mb-5 text-[0.72rem] font-bold tracking-[0.22em] text-brass uppercase">
-            For serious collectors
+            An iPhone app for serious collectors
           </p>
           <h1 className="font-display text-[2.6rem] leading-[1.08] font-bold text-primary sm:text-[3.4rem]">
             Your collection,
@@ -89,20 +94,19 @@ export function Home() {
             graded.
           </p>
 
-          <div className="mt-9 flex flex-wrap items-center gap-3">
-            <Link
-              to="/signin"
-              className="rounded-full bg-gradient-to-b from-brass-bright to-brass px-7 py-3.5 font-semibold text-ink transition-opacity hover:opacity-90"
-            >
-              Open your vault
-            </Link>
-            <a
-              href="#how"
-              className="rounded-full border border-hairline px-7 py-3.5 font-medium text-primary transition-colors hover:border-brass/60"
-            >
-              See how it works
-            </a>
+          {/* The app is the product; the download is the primary action. The
+              web vault sits underneath it as somewhere to sign in, not as an
+              alternative way to start. */}
+          <div className="mt-9">
+            <AppStoreButton />
           </div>
+
+          <p className="mt-7 text-[0.86rem] text-secondary">
+            Already have an account?{' '}
+            <Link to="/signin" className="text-brass-bright hover:underline">
+              Open your vault in the browser
+            </Link>
+          </p>
 
           <p className="mt-6 text-[0.8rem] text-tertiary">
             Football, WWE, Pokémon and anything else worth keeping.
@@ -152,6 +156,40 @@ export function Home() {
         </div>
       </section>
 
+      {/* Where the website fits. Said plainly, because a web app that looks
+          like the whole product sets people up to wonder why the camera and
+          the grade estimate aren't there. */}
+      <section className="border-t border-hairline/70 px-5 py-20">
+        <div className="mx-auto max-w-3xl">
+          <Rule label="The app and the website" />
+          <div className="grid gap-8 sm:grid-cols-2">
+            <div className="rounded-2xl border border-brass/30 bg-surface p-7">
+              <h3 className="font-display mb-2.5 text-[1.05rem] font-bold text-brass-bright">
+                On your iPhone
+              </h3>
+              <p className="text-[0.94rem] leading-relaxed text-secondary">
+                Where the collection lives. The guided camera, the grade estimate, break tracking,
+                comps and the slab labels — everything, in your pocket, at the table.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-hairline bg-surface p-7">
+              <h3 className="font-display mb-2.5 text-[1.05rem] font-bold text-primary">
+                In the browser
+              </h3>
+              <p className="text-[0.94rem] leading-relaxed text-secondary">
+                A companion for the jobs a phone is bad at: typing up a batch of cards on a real
+                keyboard, importing a spreadsheet, and reading the insurance report on a big
+                screen. Same account, same collection.
+              </p>
+            </div>
+          </div>
+          <p className="mt-7 text-center text-[0.86rem] text-tertiary">
+            The website isn't a trial or a cut-down version — it's the same vault, opened from a
+            desk. There's no Android app yet, and no iPad build.
+          </p>
+        </div>
+      </section>
+
       {/* Features */}
       <section id="features" className="border-t border-hairline/70 px-5 py-24">
         <div className="mx-auto max-w-6xl">
@@ -186,14 +224,21 @@ export function Home() {
             Start with one card.
           </h2>
           <p className="mx-auto mt-4 max-w-md text-[1rem] leading-relaxed text-secondary">
-            Sign in with the same account as the app, and your collection is already there.
+            Free while we're in beta, and everyone who joins during beta keeps the full version for
+            good.
           </p>
-          <Link
-            to="/signin"
-            className="mt-8 inline-block rounded-full bg-gradient-to-b from-brass-bright to-brass px-8 py-3.5 font-semibold text-ink transition-opacity hover:opacity-90"
-          >
-            Open your vault
-          </Link>
+          <div className="mt-8 flex flex-col items-center">
+            <AppStoreButton />
+          </div>
+          <p className="mt-6 text-[0.84rem] text-tertiary">
+            <Link to="/pricing" className="transition-colors hover:text-secondary">
+              What's free, and what isn't
+            </Link>
+            <span className="px-2">·</span>
+            <Link to="/roadmap" className="transition-colors hover:text-secondary">
+              What's coming next
+            </Link>
+          </p>
         </div>
       </section>
 

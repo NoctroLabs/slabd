@@ -37,7 +37,7 @@ jobs:
       # real routes their own index.html means they answer 200.
       - name: Give real routes a 200
         run: |
-          for route in privacy terms pricing reset signin vault vault/cards vault/breaks vault/wants vault/data vault/settings; do
+          for route in privacy terms pricing roadmap reset signin vault vault/cards vault/breaks vault/wax vault/wants vault/data vault/settings; do
             mkdir -p "dist/$route"
             cp dist/index.html "dist/$route/index.html"
           done

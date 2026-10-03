@@ -6,6 +6,7 @@ import { Field, Section, Select, TextArea, TextInput, Toggle } from '../componen
 import { useCard } from '../hooks/useCard'
 import { useCards } from '../hooks/useCards'
 import { useBreaks } from '../hooks/useBreaks'
+import { useWax } from '../hooks/useWax'
 import { useCategories } from '../hooks/useCategories'
 import { PhotoPicker } from '../components/PhotoPicker'
 import { CategoryPicker } from '../components/CategoryPicker'
@@ -13,6 +14,7 @@ import { cardImageUrl, supabase } from '../lib/supabase'
 import { deleteCardImage, uploadCardImage } from '../lib/images'
 import { AUTO_TYPES, GRADES, SERIAL_KINDS, SOURCES, STATUSES } from '../lib/options'
 import { gradeName } from '../lib/types'
+import { money } from '../lib/format'
 
 interface Draft {
   player: string
@@ -24,6 +26,7 @@ interface Draft {
   serial_total: string
   serial_kind: string
   break_spot_id: string
+  wax_id: string
   grade: string
   source: string
   seller: string
@@ -47,6 +50,7 @@ const EMPTY: Draft = {
   serial_total: '',
   serial_kind: 'Base',
   break_spot_id: '',
+  wax_id: '',
   grade: '',
   source: 'Single Purchase',
   seller: '',
@@ -85,6 +89,13 @@ export function CardForm() {
   const { card, loading } = useCard(id)
   const { cards } = useCards()
   const { breaks, spots } = useBreaks()
+  const { wax } = useWax()
+  // Only opened boxes can take a card: a sealed box's money is still in the
+  // box, so linking a card to one would charge it a cost that hasn't been
+  // released yet. The database agrees — a sealed box allocates nothing.
+  const openedWax = wax
+    .filter((w) => w.status !== 'Sealed')
+    .sort((a, b) => a.product.localeCompare(b.product))
   const { categories } = useCategories()
 
   const [d, setD] = useState<Draft>(EMPTY)
@@ -102,6 +113,31 @@ export function CardForm() {
     return seen
   }, [cards])
 
+  /// What the database will set this card's price to, when its cost comes from
+  /// a spot or a box rather than being typed in.
+  ///
+  /// The field is then shown read-only and left out of the payload entirely.
+  /// Sending it would be worse than pointless: the allocation trigger only
+  /// re-fires when the LINK changes, so a typed-over figure on an existing
+  /// card would stick until the next card joined the pot — the collection
+  /// quietly disagreeing with the split it's supposed to be showing. The app
+  /// has always hidden this field; the web let you edit it.
+  const allocated = useMemo<number | null>(() => {
+    if (d.source === 'Break' && d.break_spot_id) {
+      const spot = spots.find((sp) => sp.id === d.break_spot_id)
+      if (!spot) return null
+      const others = cards.filter((c) => c.break_spot_id === spot.id && c.id !== id).length
+      return spot.cost / (others + 1)
+    }
+    if (d.source === 'Opened Wax' && d.wax_id) {
+      const box = wax.find((w) => w.id === d.wax_id)
+      if (!box || box.price_paid == null) return null
+      const others = cards.filter((c) => c.wax_id === box.id && c.id !== id).length
+      return box.price_paid / (others + 1)
+    }
+    return null
+  }, [d.source, d.break_spot_id, d.wax_id, spots, wax, cards, id])
+
   useEffect(() => {
     if (!card) return
     setD({
@@ -114,6 +150,7 @@ export function CardForm() {
       serial_total: card.serial_total ?? '',
       serial_kind: card.serial_kind ?? 'Base',
       break_spot_id: card.break_spot_id ?? '',
+      wax_id: card.wax_id ?? '',
       grade: card.grade ?? '',
       source: card.source ?? 'Single Purchase',
       seller: card.seller ?? '',
@@ -223,12 +260,16 @@ export function CardForm() {
       serial_kind: d.serial_kind,
       // A card only belongs to a spot if it came from a break.
       break_spot_id: d.source === 'Break' && d.break_spot_id ? d.break_spot_id : null,
+      wax_id: d.source === 'Opened Wax' && d.wax_id ? d.wax_id : null,
       // Clearing the toggle must clear the stored grade, or an ungraded card
       // keeps rendering a grade block on its slab.
       grade: graded ? str(d.grade) : null,
       source: str(d.source),
       seller: str(d.seller),
-      price_paid: num(d.price_paid),
+      // Omitted, not nulled, when the cost is allocated: leaving the key out
+      // of an update means the column isn't touched, and on insert the
+      // trigger fills it in.
+      ...(allocated == null ? { price_paid: num(d.price_paid) } : {}),
       date_acquired: str(d.date_acquired),
       comp_value: num(d.comp_value),
       comp_notes: str(d.comp_notes),
@@ -403,13 +444,28 @@ export function CardForm() {
                 <Field label="Bought from">
                   <TextInput value={d.seller} onChange={(v) => set('seller', v)} placeholder="Seller" />
                 </Field>
-                <Field label="Price paid">
-                  <TextInput
-                    value={d.price_paid}
-                    onChange={(v) => set('price_paid', v)}
-                    inputMode="decimal"
-                    placeholder="0.00"
-                  />
+                <Field
+                  label="Price paid"
+                  hint={
+                    allocated == null
+                      ? undefined
+                      : d.source === 'Opened Wax'
+                        ? 'Worked out for you: what the box cost ÷ the cards logged from it. Logging another card re-splits it.'
+                        : "Worked out for you: the spot's cost ÷ its hits. Another hit re-splits it."
+                  }
+                >
+                  {allocated == null ? (
+                    <TextInput
+                      value={d.price_paid}
+                      onChange={(v) => set('price_paid', v)}
+                      inputMode="decimal"
+                      placeholder="0.00"
+                    />
+                  ) : (
+                    <p className="figures rounded-xl border border-hairline bg-raised px-3.5 py-2.5 text-[0.9rem] text-secondary">
+                      {money(allocated)}
+                    </p>
+                  )}
                 </Field>
                 <Field label="Date acquired">
                   <TextInput
@@ -440,6 +496,33 @@ export function CardForm() {
                     {spotOptions.map((o) => (
                       <option key={o.id} value={o.id}>
                         {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              )}
+
+              {/* The same treatment for a card out of a box. */}
+              {d.source === 'Opened Wax' && (
+                <Field
+                  label="From box"
+                  hint={
+                    openedWax.length === 0
+                      ? wax.length === 0
+                        ? 'No wax logged yet — add a box under Sealed Openings and its cost will spread across the cards you log from it.'
+                        : 'All your wax is still sealed. Open a box under Sealed Openings to log cards from it.'
+                      : "Price paid is worked out for you: what the box cost split across the cards you've logged from it."
+                  }
+                >
+                  <select
+                    value={d.wax_id}
+                    onChange={(e) => set('wax_id', e.target.value)}
+                    className="w-full cursor-pointer rounded-xl border border-hairline bg-raised px-3.5 py-2.5 text-[0.9rem] text-primary focus:border-brass/60 focus:outline-none"
+                  >
+                    <option value="">Not from a logged box</option>
+                    {openedWax.map((box) => (
+                      <option key={box.id} value={box.id}>
+                        {box.product}
                       </option>
                     ))}
                   </select>

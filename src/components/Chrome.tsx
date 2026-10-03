@@ -36,6 +36,12 @@ export function Nav() {
           <Link to="/pricing" className="transition-colors hover:text-primary">
             Pricing
           </Link>
+          <Link
+            to="/roadmap"
+            className="hidden transition-colors hover:text-primary sm:block"
+          >
+            Roadmap
+          </Link>
           {session ? (
             <>
               <Link to="/vault" className="transition-colors hover:text-primary">
@@ -73,6 +79,10 @@ export function Footer() {
         <p className="text-[0.78rem] text-tertiary">
           <Link to="/pricing" className="transition-colors hover:text-secondary">
             Pricing
+          </Link>
+          <span className="px-2">·</span>
+          <Link to="/roadmap" className="transition-colors hover:text-secondary">
+            Roadmap
           </Link>
           <span className="px-2">·</span>
           <Link to="/privacy" className="transition-colors hover:text-secondary">

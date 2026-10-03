@@ -33,7 +33,7 @@ export const hitsFor = (cards: Card[], spotId: string) =>
 export function spotProfitLoss(spot: BreakSpot, cards: Card[]): number {
   const linked = hitsFor(cards, spot.id)
   if (linked.length === 0) return -spot.cost
-  return linked.reduce((sum, c) => sum + profitLoss(c), 0)
+  return linked.reduce((sum, c) => sum + (profitLoss(c) ?? 0), 0)
 }
 
 /** Cost split evenly across a spot's hits, rounded to the penny exactly as

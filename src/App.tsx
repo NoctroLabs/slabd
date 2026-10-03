@@ -8,6 +8,9 @@ import { CardDetail } from './pages/CardDetail'
 import { CardForm } from './pages/CardForm'
 import { Data } from './pages/Data'
 import { Breaks } from './pages/Breaks'
+import { Wax } from './pages/Wax'
+import { WaxForm } from './pages/WaxForm'
+import { WaxDetail } from './pages/WaxDetail'
 import { BreakDetail } from './pages/BreakDetail'
 import { BreakForm } from './pages/BreakForm'
 import { Wants } from './pages/Wants'
@@ -15,6 +18,7 @@ import { WantForm } from './pages/WantForm'
 import { Settings } from './pages/Settings'
 import { Verify } from './pages/Verify'
 import { Pricing } from './pages/Pricing'
+import { Roadmap } from './pages/Roadmap'
 import { Privacy } from './pages/Privacy'
 import { Terms } from './pages/Terms'
 import { ResetPassword } from './pages/ResetPassword'
@@ -38,6 +42,7 @@ export default function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/reset" element={<ResetPassword />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/roadmap" element={<Roadmap />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         {/* Declared before the other vault routes: first run has to win. */}
@@ -53,6 +58,10 @@ export default function App() {
         <Route path="/vault/wants/new" element={<WantForm />} />
         <Route path="/vault/wants/:id/edit" element={<WantForm />} />
         <Route path="/vault/breaks" element={<Breaks />} />
+        <Route path="/vault/wax" element={<Wax />} />
+        <Route path="/vault/wax/new" element={<WaxForm />} />
+        <Route path="/vault/wax/:id" element={<WaxDetail />} />
+        <Route path="/vault/wax/:id/edit" element={<WaxForm />} />
         {/* `new` before `:id`, so it is not captured as a break id. */}
         <Route path="/vault/breaks/new" element={<BreakForm />} />
         <Route path="/vault/breaks/:id" element={<BreakDetail />} />

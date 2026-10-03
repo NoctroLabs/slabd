@@ -12,6 +12,7 @@ const nav = [
   { to: '/vault/data', label: 'Import / export' },
   { to: '/vault/wants', label: 'Want list' },
   { to: '/vault/breaks', label: 'Breaks' },
+  { to: '/vault/wax', label: 'Sealed Openings' },
   { to: '/vault/settings', label: 'Settings' },
 ]
 
