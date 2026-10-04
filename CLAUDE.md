@@ -153,7 +153,7 @@ oversight:
 
 The Supabase side is not in this repo, but it **is** version-controlled: the
 migrations and edge functions live alongside the iOS app, under `supabase/` in
-the `card-vault` repo (private). That covers the row-level security policies,
+the `NoctroLabs/slabd-ios` repo (private). That covers the row-level security policies,
 the `card-data` and `delete-account` functions, the `rename_category` RPC,
 `reallocate_cost_pool`, the founding-plan trigger, and the nightly
 `collection_snapshots` job.
